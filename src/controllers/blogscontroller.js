@@ -134,24 +134,26 @@ let deleteBlogs = async function (req, res) {
     }
 }
 
-let queryDeleted = async function (req, res) {
-  try {
-      let data = req.query
-      if (!data) return res.status(400).send({ status: false, msg: "query params is not given" })
-      let blogvalidation = await blogsModel.find(data)
-      if (!blogvalidation) returnres.req(404).send({ status: false, msg: "blog does not exist" })
-      if (blogvalidation.isDeleted == true) return res.status(404).send({ status: false, msg: "blog is all ready deleted" })
-      for (let i = 0; i < blogvalidation.length; i++) {
-          if (blogvalidation[i].isDeleted == false) {
-              let deletion = await blogsModel.updateMany(data, { $set: { isDeleted: true, deletedAt: new Date() } })
-          }
-      }
-      return res.status(200).send({ status: true, msg: "blog is deleted sucessfully" })
-
-  } catch (err) {
-      res.status(500).send({ status: false, msg: err.message });
-  }
-
+const queryDeleted = async function (req, res) {
+    try {
+        let category = req.query.category
+        let authorId = req.query.authorId
+        let tags = req.query.tags
+        let subcategory = req.query.subcategory
+        let isPublished = req.query.isPublished
+        let data = await blogsModel.find({ $or: [{ category: category }, { authorId: authorId }, { tags: tags }, { subcategory: subcategory }, { isPublished: isPublished }] });
+        if (!data) {
+            return res.send({ status: false, message: "no such data exists" })
+        }
+        let Update = await blogsModel.updateMany({ $or: [{ category: category }, { authorId: authorId }, { tags: tags }, { subcategory: subcategory }, { isPublished: isPublished }] }, { $set: { isDeleted: true } }, { new: true })
+        if(Update.modifiedCount==0){
+            return res.status(404).send({status:false, msg:"no such data available"})
+        }
+        res.send({ status: true, data: Update })  
+    }
+    catch (err) {
+        res.status(500).send({ status: false, Error: err.message }) 
+    }
 }
 
 module.exports.createBlogs = createBlogs
