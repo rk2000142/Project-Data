@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const authorSchema = new mongoose.Schema( {
+    
+     title: {
+        type: String,
+        enum: ["Mr", "Mrs", "Miss"],
+        required: true
+    },
     fname: {
         type: String,
         required: true
@@ -9,11 +15,7 @@ const authorSchema = new mongoose.Schema( {
         type: String,
         required: true
     },
-    title: {
-        type: String,
-        enum: ["Mr", "Mrs", "Miss"],
-        required: true
-    },
+   
     email:{
         type: String,
         unique: true,
