@@ -8,9 +8,14 @@ const valid = function (str) {
 
 const rex = /^[ A-Za-z_.,]*$/
 
+
+
 exports.validationCollege = async function (req, res, next) {
     try {
         const data = req.body;
+        const regex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/;
+        const nRegex = /^[ A-Za-z.,]*$/
+
         let nameRegex = /^[A-Za-z\s]{1,}[\.]{0,1}[A-Za-z\s]{0,}$/;
         if (Object.keys(data).length === 0) return res.status(404).send({ status: false, msg: "Body should not remain empty" })
         const { name, fullName, logoLink } = data;
