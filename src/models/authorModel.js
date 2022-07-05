@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+//const validator = require('validator');
 
 const authorSchema = new mongoose.Schema( {
-    
      title: {
         type: String,
         enum: ["Mr", "Mrs", "Miss"],
@@ -19,7 +19,7 @@ const authorSchema = new mongoose.Schema( {
     email:{
         type: String,
         unique: true,
-        required: true
+        required: true 
     },
     password: {
         type: String,

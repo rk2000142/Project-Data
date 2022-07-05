@@ -1,6 +1,11 @@
 const jwt = require("jsonwebtoken");
 const blogsModel = require("../models/blogsModel") 
 
+
+
+//================================================= Authentication ==================================================//
+
+
 const authenticate = async function (req, res, next) {
   try {
     let token = req.headers["x-Api-Key"];
@@ -12,7 +17,7 @@ const authenticate = async function (req, res, next) {
 
       return res.status(400).send({ status: false, msg: "token must be present" });
     }
-    
+    // console.log(token);
     try {
       let decodedToken = jwt.verify(token, "functionUp-radon");
     }
@@ -31,6 +36,9 @@ const authenticate = async function (req, res, next) {
 
 
 
+//================================================= Authorization ==================================================//
+
+
 const authorise = async function (req, res, next) {
   try {
     let token = req.headers["x-api-key"];
@@ -40,9 +48,6 @@ const authorise = async function (req, res, next) {
     let decodedToken = jwt.verify(token, "functionUp-radon");
 
     let blogId = req.params.blogId
-    // if (Object.keys(blogId).length == 0) {
-    //   return res.status(404).send({ status: false, msg: "blogId does not exists" })
-    // }
     let blog = await blogsModel.findById(blogId)
 
     if (!blog) {
