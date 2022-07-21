@@ -75,7 +75,6 @@ const createUrl = async (req, res) => {
 const getUrl = async (req, res) => {
     try {
         const urlCode = req.params.urlCode;
-        console.log(req.params)
         if (!ShortId.isValid(urlCode)) return res.status(400).send({ status: false, message: "Please enter valid urlCode" });
 
         let cachedUrlData = await GET_ASYNC(`${req.params.urlCode}`)
