@@ -22,15 +22,13 @@ const userSchema = mongoose.Schema({
         require: true
     }, // s3 link
     phone: {
-        type: string,
+        type: String,
         require: true,
         unique: true
     },
     password: {
         type: String,
         require: true,
-        min: 8,
-        max: 15
     }, // encrypted password
     address: {
         shipping: {
