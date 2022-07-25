@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 express= require("express")
 
 
@@ -60,7 +60,6 @@ const registerUser = async function (req, res) {
     }
 
 }
-=======
 const mongoose = require("mongoose")
 const userModel = require("../Model/userModel")
 const userModel = require("../Model/userModel");
@@ -120,6 +119,6 @@ const getProfile = async function (req, res) {
       res.status(500).send({ status: false, msg: err.message })
     }
 }
-module.exports = { userLogin, getProfile }
+module.exports = { userLogin, getProfile ,registerUser}
 
->>>>>>> 8f43c6f3c6d6ec351d9f0eb8e4ec09939f295257
+
