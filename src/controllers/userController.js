@@ -54,12 +54,12 @@ const registerUser = async function (req, res) {
         if ((password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
         if (!((password.length >= 8) && (password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
-        if (!address) return res.status(400).send({ status: false, message: "Please include address" }) ;
-        if(!isValidRequestBody(address)) return res.status(400).send({status:false,message:"address is required"})
+        if (!address) return res.status(400).send({ status: false, message: "Please include address" });
+        if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
 
         // billing address validation
         if (!address.billing) { return res.status(400).send({ status: false, message: "Please include billing address" }) };
-        if(!isValidRequestBody(address.billing)) return res.status(400).send({status:false,message:"billing address is required"})
+        if (!isValidRequestBody(address.billing)) return res.status(400).send({ status: false, message: "billing address is required" })
 
         if (!address.billing.street) { return res.status(400).send({ status: false, message: "Please include billing street" }) };
         if (!isValid(billing.street)) {
@@ -72,11 +72,11 @@ const registerUser = async function (req, res) {
         }
 
         if (!(address.billing.pincode)) return res.status(400).send({ status: false, message: "please provide billing address!" });
-        if(!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
-        
+        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
+
 
         if (!address.shipping) { return res.status(400).send({ status: false, message: "Please include shipping address" }) };
-        if(!isValidRequestBody(address.shipping)) return res.status(400).send({status:false,message:"shipping address is required"})
+        if (!isValidRequestBody(address.shipping)) return res.status(400).send({ status: false, message: "shipping address is required" })
 
         if (!address.shipping.street) { return res.status(400).send({ status: false, message: "Please include shipping street" }) };
         if (!isValid(shipping.street)) {
@@ -89,8 +89,8 @@ const registerUser = async function (req, res) {
         }
 
         if (!(address.billing.pincode)) return res.status(400).send({ status: false, message: "please provide shipp address!" });
-        if(!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
-        
+        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
+
         //if request files array is empty
         // if (!(files && files.length > 0)) {
         //     return res.status(400).send({ status: false, message: "Profile image is required" });
