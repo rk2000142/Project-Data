@@ -28,8 +28,8 @@ let uploadFile = async (file) => {
             if (err) {
                 return reject({ "error": err })
             }
-            console.log(data)
-            console.log("file uploaded succesfully")
+            // console.log(data)
+            // console.log("file uploaded succesfully")
             return resolve(data.Location)
         })
 
@@ -92,10 +92,10 @@ const registerUser = async function (req, res) {
         //if (!profileImage) return res.status(400).send({ status: false, message: "profileImage is required" })
 
         // address validation
-        let addresss = JSON.parse(address)
-        if (!addresss) return res.status(400).send({ status: false, message: "Please include address" });
+        //let addresss = JSON.parse(address)
+        if (!address) return res.status(400).send({ status: false, message: "Please include address" });
         if (!isValidRequestBody(addresss)) return res.status(400).send({ status: false, message: "address is required" })
-        console.log(addresss)
+        //console.log(addresss)
 
         if (!addresss.billing) { return res.status(400).send({ status: false, message: "Please include billing address" }) };
         if (!isValidRequestBody(addresss.billing)) return res.status(400).send({ status: false, message: "billing address is required" })
@@ -133,7 +133,7 @@ const registerUser = async function (req, res) {
         requestBody.address = addresss
         //--------------------------------------Validation Ends----------------------------------//
 
-        
+
 
         let files = req.files
         if (files && files.length > 0) {
@@ -145,7 +145,7 @@ const registerUser = async function (req, res) {
             res.status(201).send({ status: true, message: 'User Created Successfully', data: created })
         }
         else {
-            res.status(400).send({ msg: "No file found" })
+            res.status(400).send({status:falsee, msg: "No file found" })
         }
 
 
@@ -180,7 +180,7 @@ const userLogin = async function (req, res) {
 
         let token = jwt.sign({ userId: user._id.toString(), iat: Math.floor(Date.now() / 1000) },
             "Project5-productManagement",
-            { expiresIn: '1h' });
+            { expiresIn: '24h' });
         res.setHeader("Authorization", token);
 
         res.status(200).send({ status: true, message: "User login successful", data: { userId: user._id, token: token } });
@@ -217,7 +217,7 @@ const updatedProfile = async (req, res) => {
         let files = req.files;
         let userIdfromtoken = req.tokenId
 
-        console.log("hello")
+        //console.log("hello")
 
         // let userProfile=await userModel.findById(userId)
         if (!isValid(userId)) {
@@ -236,7 +236,7 @@ const updatedProfile = async (req, res) => {
 
 
         // check request body is valid
-        if (!(isValidRequestBody(data)||files)) {
+        if (!(isValidRequestBody(data) || files)) {
             return res.status(400).send({ status: false, msg: "Enter a valid details" });
         }
 
@@ -283,11 +283,11 @@ const updatedProfile = async (req, res) => {
 
 
 
-        //   if (data.profileImage) {
-        //       if (typeof data.profileImage === "string") {
-        //           return res.status(400).send({ Status: false, message: "Please upload the image" })
-        //       }
-        //   }
+        if (data.profileImage) {
+            if (typeof data.profileImage === "string") {
+                return res.status(400).send({ Status: false, message: "Please upload the image" })
+            }
+        }
         if (files && files.length > 0) {
 
             let uploadedFileURL = await uploadFile(files[0])
@@ -295,45 +295,32 @@ const updatedProfile = async (req, res) => {
             updateData.profileImage = uploadedFileURL
         }
         if (address) {
-            //address=JSON.parse(address)
+            if (typeof address === "string") { address = JSON.parse(address) }
             if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
-            updateData.address = {}
-            //let { shipping, billing } = address
 
-            //console.log(address)
-
-            // billing address validation
-            //shipping= JSON.parse(address.shipping)
 
             if (address.shipping) {
-                updateData.address.shipping={}
                 if (!isValidRequestBody(address.shipping)) return res.status(400).send({ status: false, message: "billing address is required" })
-
-                //let { city, street, pincode } = shipping;
-
                 if (address.shipping.street) {
                     if (!isValid(address.shipping.street)) {
-                        console.log()
                         return res.status(400).send({ status: false, message: "street is required in billing address!" });
                     }
-                    updateData.address.shipping.street = address.shipping.street;
+                    updateData['address.shipping.street'] = address.shipping.street;
                 }
 
                 if (address.shipping.city) {
-                    if (!isValid(address.shipping.city)) {
-                        return res.status(400).send({ status: false, message: "city is required in billing address!" });
-                    }
-                    updateData.address.shipping.city = address.shipping.city;
+                    if (!isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city is required in billing address!" });
+                    updateData['address.shipping.city'] = address.shipping.city;
                 }
 
                 if (address.shipping.pincode) {
-                    if (!(/^[1-9][0-9]{5}$/.test(address.shipping.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
-                    updateData.address.shipping.pincode = address.shipping.pincode;
+                    let pinCode = parseInt(address.shipping.pincode)
+                    if (!(/^[1-9][0-9]{5}$/.test(pinCode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
+                    updateData['address.shipping.pincode'] = pinCode;
                 }
             }
 
             if (address.billing) {
-                updateData.address.billing={}
                 if (!isValidRequestBody(address.billing)) return res.status(400).send({ status: false, message: "shipping address is required" })
 
 
@@ -341,20 +328,20 @@ const updatedProfile = async (req, res) => {
                     if (!isValid(address.billing.street)) {
                         return res.status(400).send({ status: false, message: "street is required in shipping address!" });
                     }
-                    updateData.address.billing.street = address.billing.street;
+                    updateData['address.billing.street'] = address.billing.street;
                 }
 
                 if (address.billing.city) {
                     if (!isValid(address.billing.city)) {
                         return res.status(400).send({ status: false, message: "city is required in shipping address!" });
                     }
-                    updateData.address.billing.city =address.billing.city;
+                    updateData['address.billing.city'] = address.billing.city;
                 }
 
 
                 if ((address.billing.pincode)) {
                     if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
-                    updateData.address.billing.pincode = address.billing.pincode;
+                    updateData['address.billing.pincode'] = address.billing.pincode;
                 }
             }
         }
