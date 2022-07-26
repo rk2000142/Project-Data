@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken") //require jsonwebtoken
 
 //<-------------------------------Authentication------------------------------------------------------//
-const authentication = function (req, res, next) {
+const authentication = async function (req, res, next) {
     try {
         let token = req.headers["authorization"];
-        console.log(token)
+        if (!token) return res.status(401).send({ status: false, msg: "token must be present" });
         const bearer = token.split(" ")
         const bearerToken = bearer[1]
-        if (!bearerToken) return res.status(401).send({ status: false, msg: "token must be present" });
+
 
         const decoded = jwt.decode(bearerToken);
         if (!decoded) {

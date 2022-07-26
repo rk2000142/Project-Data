@@ -29,8 +29,6 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         require: true,
-        min: 8,
-        max: 15
     }, // encrypted password
     address: {
         shipping: {
