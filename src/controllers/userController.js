@@ -1,6 +1,8 @@
 const mongoose = require("mongoose")
 const userModel = require("../Model/userModel");
 const jwt = require("jsonwebtoken");
+const bcrypt = require ('bcrypt');
+const aws = require("aws-sdk")
 
 
 
@@ -18,8 +20,6 @@ const isValid = function (value) {
 // Register
 const registerUser = async function (req, res) {
     try {
-
-        const files = req.files //Getting user profileImage  
         const requestBody = req.body // Getting other details of user
 
         // Validation of Request Body
@@ -54,57 +54,100 @@ const registerUser = async function (req, res) {
         if ((password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
         if (!((password.length >= 8) && (password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
-        if (!address) return res.status(400).send({ status: false, message: "Please include address" });
-        if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
+        let protectedPassword = await bcrypt.hash(password, 4) 
+        requestBody.password = protectedPassword 
 
-        // billing address validation
-        if (!address.billing) { return res.status(400).send({ status: false, message: "Please include billing address" }) };
-        if (!isValidRequestBody(address.billing)) return res.status(400).send({ status: false, message: "billing address is required" })
+        //if (!profileImage) return res.status(400).send({ status: false, message: "profileImage is required" })
 
-        if (!address.billing.street) { return res.status(400).send({ status: false, message: "Please include billing street" }) };
-        if (!isValid(billing.street)) {
+        // address validation
+        let addresss = JSON.parse(address)
+        if (!addresss) return res.status(400).send({ status: false, message: "Please include address" });
+        if (!isValidRequestBody(addresss)) return res.status(400).send({ status: false, message: "address is required" })
+        console.log(addresss)
+
+        if (!addresss.billing) { return res.status(400).send({ status: false, message: "Please include billing address" }) };
+        if (!isValidRequestBody(addresss.billing)) return res.status(400).send({ status: false, message: "billing address is required" })
+
+        if (!addresss.billing.street) { return res.status(400).send({ status: false, message: "Please include billing street" }) };
+        if (!isValid(addresss.billing.street)) {
             return res.status(400).send({ status: false, message: "street is required in billing address!" });
         }
 
-        if (!address.billing.city) { return res.status(400).send({ status: false, message: "Please include billing city" }) };
-        if (!isValid(billing.city)) {
+        if (!addresss.billing.city) { return res.status(400).send({ status: false, message: "Please include billing city" }) };
+        if (!isValid(addresss.billing.city)) {
             return res.status(400).send({ status: false, message: "city is required in billing address!" });
         }
 
-        if (!(address.billing.pincode)) return res.status(400).send({ status: false, message: "please provide billing address!" });
-        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
+        if (!(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "please provide billing address!" });
+        if (!(/^[1-9][0-9]{5}$/.test(addresss.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
 
 
-        if (!address.shipping) { return res.status(400).send({ status: false, message: "Please include shipping address" }) };
-        if (!isValidRequestBody(address.shipping)) return res.status(400).send({ status: false, message: "shipping address is required" })
+        if (!addresss.shipping) { return res.status(400).send({ status: false, message: "Please include shipping address" }) };
+        if (!isValidRequestBody(addresss.shipping)) return res.status(400).send({ status: false, message: "shipping address is required" })
 
-        if (!address.shipping.street) { return res.status(400).send({ status: false, message: "Please include shipping street" }) };
-        if (!isValid(shipping.street)) {
+        if (!addresss.shipping.street) { return res.status(400).send({ status: false, message: "Please include shipping street" }) };
+        if (!isValid(addresss.shipping.street)) {
             return res.status(400).send({ status: false, message: "street is required in shipping address!" });
         }
 
-        if (!address.shipping.city) { return res.status(400).send({ status: false, message: "Please include shipping city" }) };
-        if (!isValid(shipping.city)) {
+        if (!addresss.shipping.city) { return res.status(400).send({ status: false, message: "Please include shipping city" }) };
+        if (!isValid(addresss.shipping.city)) {
             return res.status(400).send({ status: false, message: "city is required in shipping address!" });
         }
 
-        if (!(address.billing.pincode)) return res.status(400).send({ status: false, message: "please provide shipp address!" });
-        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
+        if (!(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "please provide shipping address!" });
+        if (!(/^[1-9][0-9]{5}$/.test(addresss.shipping.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
 
-        //if request files array is empty
-        // if (!(files && files.length > 0)) {
-        //     return res.status(400).send({ status: false, message: "Profile image is required" });
-        // }
-
+        requestBody.address= addresss
         //--------------------------------------Validation Ends----------------------------------//
 
-        requestBody.profileImage = await uploadFile(files[0]);  //profileImage uploaded to AWS S3 Bucket
+        aws.config.update({
+            accessKeyId: "AKIAY3L35MCRVFM24Q7U",
+            secretAccessKey: "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",
+            region: "ap-south-1"
+        })
 
-        const createdUser = await userModel.create(requestBody)
-        res.status(201).send({ status: true, message: 'User created successfully', data: createdUser })
+        let uploadFile = async (file) => {
+            return new Promise(function (resolve, reject) {
+                // this function will upload file to aws and return the link
+                let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
+
+                var uploadParams = {
+                    ACL: "public-read",
+                    Bucket: "classroom-training-bucket",  //HERE
+                    Key: "group23/" + file.originalname, //HERE 
+                    Body: file.buffer
+                }
+
+
+                s3.upload(uploadParams, function (err, data) {
+                    if (err) {
+                        return reject({ "error": err })
+                    }
+                    console.log(data)
+                    console.log("file uploaded succesfully")
+                    return resolve(data.Location)
+                })
+
+            })
+        }
+
+        let files = req.files
+        if (files && files.length > 0) {
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL = await uploadFile(files[0])
+            requestBody.profileImage = uploadedFileURL
+            let created = await userModel.create(requestBody)
+            res.status(201).send({ status: true, message: 'User Created Successfully', data: created })
+        }
+        else {
+          res.status(400).send({ msg: "No file found" })
+        }
 
 
     } catch (err) {
+        console.log(err)
         res.status(500).send({ status: false, msg: err.message })
     }
 
@@ -121,8 +164,11 @@ const userLogin = async function (req, res) {
         if (isValid(email)) return res.status(400).send({ status: false, message: "Email Id is required" })
         if (isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
 
-        const user = await userModel.findOne({ email: email, password: password });
+        const user = await userModel.findOne({ email: email });
         if (!user) return res.status(401).send({ status: false, message: "Invalid Credential" })
+        bcrypt.compare(password, user.password, function(err, result){
+            if (err) return res.status(401).send({status:false,message:"password is wrong"})
+        })
 
         let token = jwt.sign({ userId: user._id.toString(), iat: Math.floor(Date.now() / 1000) },
             "Project5-productManagement",
@@ -145,7 +191,7 @@ const getProfile = async function (req, res) {
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid userId" })
         if (req.tokenId != userId) return res.status(403).send({ status: false, message: "unauthorized" })
 
-        profile = await userModel.findById(userId)
+        let profile = await userModel.findById(userId)
         if (!profile) return res.status(404).send({ status: false, message: "no such user" })
         res.status(200).send({ status: true, message: 'User profile details', data: profile })
 
