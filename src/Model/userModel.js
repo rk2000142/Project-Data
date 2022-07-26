@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema({
         require: true
     }, // s3 link
     phone: {
-        type: string,
+        type: String,
         require: true,
         unique: true
     },
