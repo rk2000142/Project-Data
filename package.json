@@ -4,18 +4,19 @@
   "description": "Products Management",
   "main": "index.js",
   "scripts": {
-    "test": "\"echo \\\"Error: no test specified\\\" && exit 1\""
+    "test": "\"echo \\\"Error: no test specified\\\" && exit 1\"",
+    "start": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sabihak89/radon.git"
+    "url": "https://github.com/linagodbole98/project-productsManagementGroup23.git"
   },
   "author": "Lina G, souvik J, Rohit K",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sabihak89/radon/issues"
+    "url": "https://github.com/linagodbole98/project-productsManagementGroup23.git"
   },
-  "homepage": "https://github.com/sabihak89/radon#readme",
+  "homepage": "https://github.com/linagodbole98/project-productsManagementGroup23.git",
   "dependencies": {
     "aws-sdk": "^2.1181.0",
     "bcrypt": "^5.0.1",

@@ -14,6 +14,7 @@ const isValid = function (value) {
     if (typeof value === "string" && value.trim().length === 0) return false;
     if (typeof value === "string") return true;
 }
+const nameRegex = /^[a-zA-Z ]{2,45}$/;
 
 
 
@@ -33,7 +34,7 @@ const registerUser = async function (req, res) {
         //--------------------------------------Validation Starts----------------------------------//
 
         if (!fname) return res.status(400).send({ status: false, message: "fname is required" })
-        if (!isValid(fname)) return res.status(400).send({ status: false, message: "fname must be in string & not empty" })
+        if (!isValid(fname)&& !(nameRegex.test(fname))) return res.status(400).send({ status: false, message: "fname must be in string & not empty" })
 
         if (!lname) return res.status(400).send({ status: false, message: "lname is required" })
         if (!isValid(lname)) return res.status(400).send({ status: false, message: "lname must be in string & not empty" })
@@ -293,11 +294,10 @@ const updatedProfile = async (req, res) => {
       if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
       updateData.address = data.address
       }
-
       // billing address validation
       let { shipping, billing } = address;
       console.log(address.billing)
-      shipping= JSON.parse(address.shipping)
+      address= JSON.parse(data.address)
 
       if (address.shipping) { 
       if (!isValidRequestBody(address.shipping)) return res.status(400).send({ status: false, message: "billing address is required" })}
@@ -305,9 +305,8 @@ const updatedProfile = async (req, res) => {
 
       if (address.shipping.street) {  
       if (!isValid(address.shipping.street)) {
-        console.log()
           return res.status(400).send({ status: false, message: "street is required in billing address!" });}
-          updateData.address.shipping.street = shipping.street;
+          updateData.address.shipping.street = address.shipping.street;
       }
 
       if (address.shipping.city) { 
@@ -348,6 +347,10 @@ const updatedProfile = async (req, res) => {
         res.status(500).send({msg:err.message})
     }
   };
+
+  //------------------------------------------------------[DELETE PROFILE]---------------------------------------------------------------
+  
+
   
 module.exports = { userLogin, getProfile ,registerUser,updatedProfile}
 
