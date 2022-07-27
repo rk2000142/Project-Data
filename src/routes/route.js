@@ -12,5 +12,9 @@ router.put("/user/:userId/profile", middleware.authentication, userController.up
 
 //PRODUCT 
 router.post("/products",productController.addproduct)
+router.get("/products",productController.getByQuery)
+router.get("GET /products/:productId",productController.getProfileById)
+router.put("products/:productId",productController.updateProduct)
+router.delete("/products/:productId",productController.deleteProduct)
 module.exports = router;
 
