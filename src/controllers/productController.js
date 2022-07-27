@@ -61,7 +61,7 @@ const titleRegex = /^[a-zA-Z ]{2,45}$/;
 const addproduct = async (req, res) => {
     try{
     let data = req.body
-    let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, deletedAt } = data
+    let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments} = data
 
     if (!isValid(title) && !titleRegex.test(title)) return res.status(400).send({ status: false, message: "Title is required." });
     //checking for duplicate title
