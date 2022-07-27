@@ -95,7 +95,8 @@ const registerUser = async function (req, res) {
         // address validation
         let addresss = JSON.parse(address)
         if (!address) return res.status(400).send({ status: false, message: "Please include address" });
-        if (!isValidRequestBody(addresss)) return res.status(400).send({ status: false, message: "address is required" })
+        if (typeof address === "string")  {address = JSON.parse(address)}
+        if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
         //console.log(addresss)
 
         if (!addresss.billing) { return res.status(400).send({ status: false, message: "Please include billing address" }) };
