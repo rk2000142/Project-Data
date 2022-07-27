@@ -93,6 +93,7 @@ const registerUser = async function (req, res) {
         //if (!profileImage) return res.status(400).send({ status: false, message: "profileImage is required" })
 
         // address validation
+        let addresss = JSON.parse(address)
         if (!address) return res.status(400).send({ status: false, message: "Please include address" });
         if (typeof address === "string")  {address = JSON.parse(address)}
         if (!isValidRequestBody(address)) return res.status(400).send({ status: false, message: "address is required" })
