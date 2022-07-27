@@ -61,7 +61,7 @@ const titleRegex = /^[a-zA-Z ]{2,45}$/;
 const addproduct = async (req, res) => {
     try {
         let data = req.body
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = data
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments,productImage } = data
         
         if(!isValidRequestBody(data))  return res.status(400).send({ status: false, message: "Invalid request parameter, please provide user Details" })
       
@@ -71,11 +71,13 @@ const addproduct = async (req, res) => {
         //checking for duplicate title
         let checkTitle = await productModel.findOne({ title: data.title });
         if (checkTitle) return res.status(400).send({ status: false, message: "Title already exist" });
-
+        
+        if(!description) return res.status(400).send({ status: false, message: "description is required." });
         if (!isValid(description) && isValidString(description)) return res.status(400).send({ status: false, message: "description is required." });
 
-        if (!isValidString(price) && !isValidPrice(price)) return res.status(400).send({ status: false, message: "price is required." });
-
+        if (!price) return res.status(400).send({ status: false, message: "price is required." });
+        if(!isValidString(price)&&!isValidPrice(price))  return res.status(400).send({ status: false, message: "price Should be in number only...!" });
+     
         if (!isValid(currencyId)) return res.status(400).send({ status: false, message: "currencyId is required." });
         if (!(/INR/.test(currencyId))) return res.status(400).send({ status: false, message: "Currency Id of product should be in uppercase 'INR' format" });
         //currencyFormat
@@ -89,22 +91,15 @@ const addproduct = async (req, res) => {
             if (!titleRegex.test(style))return res.status(400).send({status: false,message: " Please provide valid style including characters only."});
 
         }
+         
         // check availableSizes
-        if (!isValid(availableSizes)) {
-            return res.status(400).send({ status: false, message: "Available Size is required" })
-        }
+        if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Available Size is required" })}
 
-        // if (availableSizes) {
-        //     console.log(availableSizes)
-        //    // let sizes = availableSizes.split(",").map(x => x.trim())
-        //     //sizes.forEach((size) => {
-        //         let size = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-        //         let check = size.includes(availableSizes) 
-        //         console.log(check)
-        //         if(!check)  return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
-
-
-        //     }
+        for(let i = 0;  i < data.availableSizes.length; i++){ 
+            if(!isValidSize(data.availableSizes[i])) {
+              return res.status(400).send({ status: false, message: "Sizes should one of these - 'S', 'XS', 'M', 'X', 'L', 'XXL' and 'XL'" })
+            }
+          }
         
 
 
@@ -137,7 +132,9 @@ const addproduct = async (req, res) => {
             installments,
 
         };
-        let files = req.files
+
+        let files = req.files  
+      if(files.length == 0) return res.status(400).send({ status: false, message: "Please upload product image" });
         if (files && files.length > 0) {
             //upload to s3 and get the uploaded link
             // res.send the link back to frontend/postman
