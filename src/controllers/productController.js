@@ -300,13 +300,12 @@ const updateProduct = async function (req, res) {
         // if(files || files == ""){
         // //  if (files.length == 0)
         // }
-
+        if(files==[]) return res.status(400).send({status:false,message:"provide image in files"})
         if (files && files.length > 0) {
-            if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
             //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL = await uploadFile(files[0])
             updatedata.productImage = uploadedFileURL
+            if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(updatedata.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
         }
 
 
