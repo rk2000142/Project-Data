@@ -96,15 +96,15 @@ const addproduct = async (req, res) => {
 
         if (availableSizes) {
             let size1 = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            let size2 = availableSizes.toUpperCase().split(",").map((x) => x.trim())
+            let size2 = availableSizes.split(",").map((x) => x.trim().toUpperCase())
             for (let i = 0; i < size2.length; i++) {
                 if (!(size1.includes(size2[i]))) {
                     return res.status(400).send({ status: false, message: "Sizes should one of these - 'S', 'XS', 'M', 'X', 'L', 'XXL' and 'XL'" })
 
                 }
-                availableSizes = size2
-
+                
             }
+            data.availableSizes = size2
         }
 
 
@@ -126,33 +126,21 @@ const addproduct = async (req, res) => {
             }
             if ((typeof isFreeShipping != "boolean")) { return res.status(400).send({ status: false, message: "isFreeShipping must be a boolean value" }); }
         }
-        const newProductData = {
-            title,
-            description,
-            price,
-            currencyId,
-            currencyFormat: currencyFormat,
-            isFreeShipping,
-            style,
-            availableSizes: availableSizes,
-            installments,
-
-        };
 
 
         if (!files || files.length == 0) return res.status(400).send({ status: false, message: "Please upload product image" });
         //upload to s3 and get the uploaded link
         let uploadedFileURL = await uploadFile(files[0])
-        newProductData.productImage = uploadedFileURL
-        if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(newProductData.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
+        data.productImage = uploadedFileURL
+        if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(data.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
 
         // console.log(availableSizes.length);
-        console.log(newProductData)
 
 
-        let created = await productModel.create(newProductData)
+        let created = await productModel.create(data)
         res.status(201).send({ status: true, message: 'Product Created Successfully', data: created })
     } catch (err) {
+        console.log(err)
         res.status(500).send({ status: false, error: err.message })
     }
 }
