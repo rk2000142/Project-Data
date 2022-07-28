@@ -108,7 +108,6 @@ const addproduct = async (req, res) => {
         }
 
 
-
         //checking for installments in data
         if (installments) {
             if (!isValidString(installments)) return res.status(400).send({ status: false, message: "Installments should be in numbers" });
