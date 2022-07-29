@@ -237,13 +237,18 @@ const getByQuery = async function (req, res) {
 
         if (query.size) {
             let sizes = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            if (!sizes.includes(query.size)) return res.status(400).send({ status: false, message: "Sizes should one of these - 'S', 'XS', 'M', 'X', 'L', 'XXL' and 'XL'" })
-            query.availableSizes = query.size
+            let size2 = query.size.split(",").map((x) => x.trim().toUpperCase())
+            for (let i = 0; i < size2.length; i++) {
+                if (!(sizes.includes(size2[i]))) {
+                    return res.status(400).send({ status: false, message: "Sizes should one of these - 'S', 'XS', 'M', 'X', 'L', 'XXL' and 'XL'" })
+                }
+            }
+            query.availableSizes =  { $in: size2 }
         }
 
         if (query.name) {
             if (!isValid(query.name)) return res.status(400).send({ status: false, message: "name should be in string & not empty" })
-            query.title = query.name
+            query.title = { $regex: query.name, $options: 'i' }
         }
         let less = {}
         let greate = {}
