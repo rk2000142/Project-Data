@@ -144,6 +144,7 @@ const addproduct = async (req, res) => {
         res.status(500).send({ status: false, error: err.message })
     }
 }
+<<<<<<< HEAD
 //----------------------------------------------[Get productId]----------------------//
 const getProducts = async (req, res) => {
     try {
@@ -235,6 +236,8 @@ const getProducts = async (req, res) => {
       return res.status(500).send({ status: false, message: err.message });
     }
   };
+=======
+>>>>>>> a64c916da492d094c3117a1a846bdc235aa84cbb
 //----------------------------------------------------[GET PRODUCT BY ID]----------------------------------------
 const getProductsById = async (req, res) => {
     try {
@@ -430,4 +433,8 @@ const deleteProduct = async function (req, res) {
     }
 }
 
+<<<<<<< HEAD
 module.exports = { addproduct, getByQuery, getProductsById, updateProduct, deleteProduct }
+=======
+module.exports = { addproduct, getByQuery, getProductsById, updateProduct, deleteProduct }
+>>>>>>> a64c916da492d094c3117a1a846bdc235aa84cbb
