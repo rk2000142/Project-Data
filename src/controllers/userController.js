@@ -360,7 +360,3 @@ const updatedProfile = async (req, res) => {
 };
 
 module.exports = { userLogin, getProfile, registerUser, updatedProfile }
-<<<<<<< HEAD
-=======
-
->>>>>>> a64c916da492d094c3117a1a846bdc235aa84cbb
