@@ -27,4 +27,8 @@ const authentication = async function (req, res, next) {
     }
 }
 
+<<<<<<< HEAD
 module.exports.authentication = authentication
+=======
+module.exports.authentication = authentication
+>>>>>>> a64c916da492d094c3117a1a846bdc235aa84cbb

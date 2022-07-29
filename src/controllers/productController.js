@@ -96,15 +96,15 @@ const addproduct = async (req, res) => {
 
         if (availableSizes) {
             let size1 = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            let size2 = availableSizes.toUpperCase().split(",").map((x) => x.trim())
+            let size2 = availableSizes.split(",").map((x) => x.trim().toUpperCase())
             for (let i = 0; i < size2.length; i++) {
                 if (!(size1.includes(size2[i]))) {
                     return res.status(400).send({ status: false, message: "Sizes should one of these - 'S', 'XS', 'M', 'X', 'L', 'XXL' and 'XL'" })
 
                 }
-                availableSizes = size2
-
+                
             }
+            data.availableSizes = size2
         }
 
 
@@ -125,36 +125,115 @@ const addproduct = async (req, res) => {
             }
             if ((typeof isFreeShipping != "boolean")) { return res.status(400).send({ status: false, message: "isFreeShipping must be a boolean value" }); }
         }
-        const newProductData = {
-            title,
-            description,
-            price,
-            currencyId,
-            currencyFormat: currencyFormat,
-            isFreeShipping,
-            style,
-            availableSizes: availableSizes,
-            installments,
-
-        };
 
 
         if (!files || files.length == 0) return res.status(400).send({ status: false, message: "Please upload product image" });
         //upload to s3 and get the uploaded link
         let uploadedFileURL = await uploadFile(files[0])
-        newProductData.productImage = uploadedFileURL
-        if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(newProductData.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
+        data.productImage = uploadedFileURL
+        if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(data.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
 
         // console.log(availableSizes.length);
-        console.log(newProductData)
 
 
-        let created = await productModel.create(newProductData)
+        let created = await productModel.create(data)
         res.status(201).send({ status: true, message: 'Product Created Successfully', data: created })
     } catch (err) {
+        console.log(err)
         res.status(500).send({ status: false, error: err.message })
     }
 }
+//----------------------------------------------[Get productId]----------------------//
+const getProducts = async (req, res) => {
+    try {
+      let query = req.query;
+  
+      const product = { isDeleted: false };
+  
+      if (query.size) {
+        let allowedSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+        if (!isValid(query.size))
+          return res
+            .status(400)
+            .send({ status: false, message: "Please enter a available size" });
+  
+        query.size = query.size.toUpperCase();
+  
+        if (!allowedSizes.includes(query.size))
+          return res.status(400).send({
+            status: false,
+            message: "Sizes can only be S, XS, M, X, L, XL, XXL",
+          });
+        product.availableSizes = query.size;
+      }
+  
+      if (query.name) {
+        if (!isValidTitle(query.name))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter a valid title",
+          });
+        product.title = query.name;
+      }
+  
+      if (query.priceGreaterThan) {
+        if (!/^[0-9]+$/.test(query.priceGreaterThan))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter a valid product price",
+          });
+        product.price = { $gt: query.priceGreaterThan };
+      }
+      if (query.priceLessThan) {
+        if (!/^[0-9]+$/.test(query.priceLessThan))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter a valid product price",
+          });
+        product.price = { $lt: query.priceLessThan };
+      }
+      if (query.priceGreaterThan && query.priceLessThan)
+        product.price = { $lt: query.priceLessThan, $gt: query.priceGreaterThan };
+  
+      const getProductDetails = await productModel
+        .find(product)
+        .sort({ price: query.priceSort });
+  
+      if (getProductDetails.length == 0)
+        return res
+          .status(400)
+          .send({ status: false, message: "No products found" });
+  
+      res.status(200).send({ status: true, message: getProductDetails });
+    } catch (err) {
+      return res.status(500).send({ status: false, message: err.message });
+    }
+  };
+  
+  const getProductDetails = async (req, res) => {
+    try {
+      let productId = req.params.productId;
+  
+      if (!isValidObjectId(productId))
+        return res.status(400).send({
+          status: false,
+          message: "ProductId is not a valid ObjectId",
+        });
+  
+      let product = await productModel.findOne({
+        _id: productId,
+        isDeleted: false,
+      });
+      if (!product)
+        return res.status(404).send({
+          status: false,
+          message: "No products found or product has been deleted",
+        });
+      res.status(200).send({ status: true, message: "Success", data: product });
+    } catch (err) {
+      return res.status(500).send({ status: false, message: err.message });
+    }
+  };
 //----------------------------------------------------[GET PRODUCT BY ID]----------------------------------------
 const getProductsById = async (req, res) => {
     try {
@@ -309,14 +388,15 @@ const updateProduct = async function (req, res) {
         }
 
 
-     
-
+        // if(files || files == ""){
+        // //  if (files.length == 0)
+        // }
+        if(files==[]) return res.status(400).send({status:false,message:"provide image in files"})
         if (files && files.length > 0) {
-            if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
             //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL = await uploadFile(files[0])
             updatedata.productImage = uploadedFileURL
+            if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(updatedata.productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
         }
 
 
