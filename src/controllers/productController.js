@@ -107,7 +107,6 @@ const addproduct = async (req, res) => {
             data.availableSizes = size2
 
 
-
         //checking for installments in data
         if (installments||installments == "") {
             if (!isValid(installments)) return res.status(400).send({ status: false, message: "Installments should be in numbers" });
@@ -143,6 +142,73 @@ const addproduct = async (req, res) => {
         res.status(500).send({ status: false, error: err.message })
     }
 }
+//----------------------------------------------[Get productId]----------------------//
+// const getProducts = async (req, res) => {
+//     try {
+//       let query = req.query;
+  
+//       const product = { isDeleted: false };
+  
+//       if (query.size) {
+//         let allowedSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+//         if (!isValid(query.size))
+//           return res
+//             .status(400)
+//             .send({ status: false, message: "Please enter a available size" });
+  
+//         query.size = query.size.toUpperCase();
+  
+//         if (!allowedSizes.includes(query.size))
+//           return res.status(400).send({
+//             status: false,
+//             message: "Sizes can only be S, XS, M, X, L, XL, XXL",
+//           });
+//         product.availableSizes = query.size;
+//       }
+  
+//       if (query.name) {
+//         if (!isValidTitle(query.name))
+//           return res.status(400).send({
+//             status: false,
+//             message: "Please enter a valid title",
+//           });
+//         product.title = query.name;
+//       }
+  
+//       if (query.priceGreaterThan) {
+//         if (!/^[0-9]+$/.test(query.priceGreaterThan))
+//           return res.status(400).send({
+//             status: false,
+//             message: "Please enter a valid product price",
+//           });
+//         product.price = { $gt: query.priceGreaterThan };
+//       }
+//       if (query.priceLessThan) {
+//         if (!/^[0-9]+$/.test(query.priceLessThan))
+//           return res.status(400).send({
+//             status: false,
+//             message: "Please enter a valid product price",
+//           });
+//         product.price = { $lt: query.priceLessThan };
+//       }
+//       if (query.priceGreaterThan && query.priceLessThan)
+//         product.price = { $lt: query.priceLessThan, $gt: query.priceGreaterThan };
+  
+//       const getProductDetails = await productModel
+//         .find(product)
+//         .sort({ price: query.priceSort });
+  
+//       if (getProductDetails.length == 0)
+//         return res
+//           .status(400)
+//           .send({ status: false, message: "No products found" });
+  
+//       res.status(200).send({ status: true, message: getProductDetails });
+//     } catch (err) {
+//       return res.status(500).send({ status: false, message: err.message });
+//     }
+//   };
+  
 //----------------------------------------------------[GET PRODUCT BY ID]----------------------------------------
 const getProductsById = async (req, res) => {
     try {
@@ -163,8 +229,7 @@ const getProductsById = async (req, res) => {
     }
 }
 
-//-----------------------------------------[getByQuery]-----------------------------------
-
+//---------------------------------------------------------[getByQuery]-------------------------------------------------
 const getByQuery = async function (req, res) {
     try {
         let query = req.query
@@ -229,12 +294,13 @@ const updateProduct = async function (req, res) {
 
         }
 
+
         if (description || typeof description == 'string') {
 
             if (!(isValid(description) || isValidString(description))) return res.status(400).send({ status: false, message: "description is required." });
             updatedata.description = description
         }
-        //  if(price == "")  return res.status(400).send({ status: false, message: "Enter a valid value  for price" })
+   
 
         if (price || price == "") {
             if (!(isValid(price) || isValidPrice(price))) return res.status(400).send({ status: false, message: "price Should be in number only...!" });
@@ -278,7 +344,7 @@ const updateProduct = async function (req, res) {
                 availableSizes = size2
 
             }
-            //  updatedata.availableSizes= availableSizes
+            
         }
 
 

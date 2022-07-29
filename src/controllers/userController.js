@@ -360,4 +360,3 @@ const updatedProfile = async (req, res) => {
 };
 
 module.exports = { userLogin, getProfile, registerUser, updatedProfile }
-
