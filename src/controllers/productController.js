@@ -65,7 +65,7 @@ const addproduct = async (req, res) => {
         let data = req.body
         let files = req.files
         if (!(isValidRequestBody(data) || files)) return res.status(400).send({ status: false, message: "Invalid request parameter, please provide user Details" })
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage } = data
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = data
 
 
         if (!isValid(title)) return res.status(400).send({ status: false, message: "Title is required." });
@@ -94,7 +94,7 @@ const addproduct = async (req, res) => {
 
         }
 
-        if (availableSizes) {
+        if (!availableSizes) return res.send({status:false})
             let size1 = ["S", "XS", "M", "X", "L", "XXL", "XL"]
             let size2 = availableSizes.split(",").map((x) => x.trim().toUpperCase())
             for (let i = 0; i < size2.length; i++) {
@@ -105,7 +105,6 @@ const addproduct = async (req, res) => {
                 
             }
             data.availableSizes = size2
-        }
 
 
 
@@ -165,6 +164,7 @@ const getProductsById = async (req, res) => {
 }
 
 //-----------------------------------------[getByQuery]-----------------------------------
+
 const getByQuery = async function (req, res) {
     try {
         let query = req.query
@@ -213,11 +213,11 @@ const updateProduct = async function (req, res) {
 
         if (!(Object.keys(data).length || files)) return res.status(400).send({ status: false, message: "please provide data to update" })
 
-        let { title, description, price, isFreeShipping, productImage, currencyId, currencyFormat, style, availableSizes, installments } = data
+        let { title, description, price, isFreeShipping, currencyId, currencyFormat, style, availableSizes, installments } = data
         let updatedata = {};
 
 
-        if (title || typeof title == 'string') {
+        if (title ||  title == '') {
             //if(title ) return res.status(400).send({ status: false, message: "Title is required." });
             if (!isValid(title)) return res.status(400).send({ status: false, message: "Title is required." });
             if (!titleRegex.test(title)) return res.status(400).send({ status: false, message: " Please provide valid title including characters only." });
