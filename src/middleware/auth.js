@@ -1,18 +1,20 @@
 const jwt = require("jsonwebtoken") //require jsonwebtoken
 
 //<-------------------------------Authentication------------------------------------------------------//
-const authentication = function (req, res, next) {
+const authentication = async function (req, res, next) {
     try {
-        let token = req.headers["Authorization"];
-        if (!token) token = req.headers["Authorization"];
+        let token = req.headers["authorization"];
         if (!token) return res.status(401).send({ status: false, msg: "token must be present" });
+        const bearer = token.split(" ")
+        const bearerToken = bearer[1]
 
-        const decoded = jwt.decode(token);
+
+        const decoded = jwt.decode(bearerToken);
         if (!decoded) {
             return res.status(401).send({ status: false, message: "Invalid authentication token in request headers " })
         }
 
-        jwt.verify(token, "Project5-productManagement", function (err, decoded) {
+        jwt.verify(bearerToken, "Project5-productManagement", function (err, decoded) {
             if (err) {
                 return res.status(401).send({ status: false, message: "invalid token" })
             } else {
@@ -25,4 +27,4 @@ const authentication = function (req, res, next) {
     }
 }
 
-module.exports = authentication
+module.exports.authentication = authentication
