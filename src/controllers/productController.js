@@ -175,7 +175,7 @@ const getProductsById = async (req, res) => {
     }
 }
 
-//-----------------------------------------[getByQuery]-----------------------------------
+//---------------------------------------------------------[getByQuery]-------------------------------------------------
 const getByQuery = async function (req, res) {
     try {
         let query = req.query
@@ -240,12 +240,13 @@ const updateProduct = async function (req, res) {
 
         }
 
+
         if (description || typeof description == 'string') {
 
             if (!(isValid(description) || isValidString(description))) return res.status(400).send({ status: false, message: "description is required." });
             updatedata.description = description
         }
-        //  if(price == "")  return res.status(400).send({ status: false, message: "Enter a valid value  for price" })
+   
 
         if (price || price == "") {
             if (!(isValid(price) || isValidPrice(price))) return res.status(400).send({ status: false, message: "price Should be in number only...!" });
@@ -289,7 +290,7 @@ const updateProduct = async function (req, res) {
                 availableSizes = size2
 
             }
-            //  updatedata.availableSizes= availableSizes
+            
         }
 
 
@@ -308,9 +309,7 @@ const updateProduct = async function (req, res) {
         }
 
 
-        // if(files || files == ""){
-        // //  if (files.length == 0)
-        // }
+     
 
         if (files && files.length > 0) {
             if (!/(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i.test(productImage)) return res.status(400).send({ status: false, message: "Please provide profileImage in correct format like jpeg,png,jpg,gif,bmp etc" })
