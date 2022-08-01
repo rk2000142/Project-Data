@@ -38,14 +38,19 @@ const createCart = async function (req, res) {
       let productCheck = await productModel.findById(data.items[i].productId)
       if (!productCheck) return res.status(404).send({ status: false, message: ` product ${data.items[i].productId} not found` })
       if (productCheck.isDeleted == true) return res.status(404).send({ status: false, message: `${data.items[i].productId} this product is deleted` })
-      data.totalPrice += productCheck.price * data.items[i].quantity
+      data.totalPrice = data.totalPrice+ productCheck.price * data.items[i].quantity
     }
 
     let cartCheck = await cartModel.findOne({ userId: userId })
     if (cartCheck) {
+      const updateData = await cartModel.findOneAndUpdate(
+        {userId:userId},
+        {$inc:{totalPrice:data.totalPrice,totalItems:data.totalItems},$push:{items:data.items}},
+        {new:true})
+        return res.status(200).send({status:false,message:"success", data:updateData})
 
     }else{
-      const createData = await cardModel.create(data)
+      const createData = await cartModel.create(data)
       return res.status(201).send({ status: true, message: "Success", data: createData })
     }
   } catch (err) {
@@ -152,6 +157,7 @@ const getCart = async function (req, res) {
 const deleteCart = async function (req, res) {
   try {
   } catch (err) {
+    console.log(err)
     return res.status(500).send({ status: false, message: err.message });
   }
 };
