@@ -1,8 +1,8 @@
 const express = require("express");  //post,get 
 const router = express.Router();
 const userController = require("../controllers/userController")
-const productController = require("../controllers/productController")
-const cardController = require("../controllers/cardController")
+const productController = require("../controllers/productController") 
+const cartController = require("../controllers/cartController")
 const middleware = require("../middleware/auth")
 
 //USER
@@ -17,7 +17,9 @@ router.get("/products",productController.getByQuery)
 router.get('/products/:productId', productController.getProductsById)
 router.put("/products/:productId",productController.updateProduct)
 router.delete("/products/:productId",productController.deleteProduct)
-
+ 
 //CARD
-router.post("/users/:userId/cart",middleware.authentication, cardController.createCart)
+router.post("/users/:userId/cart",middleware.authentication, cartController.createCart)
+router.put("/users/:userId/cart" ,middleware.authentication,cartController.updateCart)
+router.get("/users/:userId/cart",middleware.authentication,cartController.getCart)
 module.exports = router;
