@@ -2,7 +2,7 @@ const express = require("express");  //post,get
 const router = express.Router();
 const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
-const cardController = require("../controllers/cardController")
+const cardController = require("../controllers/cartController")
 const middleware = require("../middleware/auth")
 
 //USER
@@ -20,4 +20,6 @@ router.delete("/products/:productId",productController.deleteProduct)
 
 //CARD
 router.post("/users/:userId/cart",middleware.authentication, cardController.createCart)
+router.get("/users/:userId/cart",middleware.authentication, cardController.getCart)
+
 module.exports = router;
