@@ -74,7 +74,7 @@ const registerUser = async function (req, res) {
         if (!email) return res.status(400).send({ status: false, message: "email is required" })
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) return res.status(400).send({ status: false, message: "enter valid email" })
         let emailCheck = await userModel.findOne({ email: email })
-        if (emailCheck) return res.status(409).send({ status: false, msg: "email already used" })
+        if (emailCheck) return res.status(409).send({ status: false, message: "email already used" })
         // if (!isValid(email)) return res.status(400).send({ status: false, message: "email must be in string & not empty"})
 
         if (!isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
@@ -147,13 +147,13 @@ const registerUser = async function (req, res) {
             res.status(201).send({ status: true, message: 'User Created Successfully', data: created })
         }
         else {
-            res.status(400).send({status:falsee, msg: "No file found" })
+            res.status(400).send({status:false, message: "No file found" })
         }
 
 
     } catch (err) {
         console.log(err)
-        res.status(500).send({ status: false, msg: err.message })
+        res.status(500).send({ status: false, message: err.message })
     }
 
 }
@@ -167,18 +167,20 @@ const userLogin = async function (req, res) {
         if (!isValidRequestBody(loginData)) {
             return res.status(400).send({ status: false, message: "Invalid Request, please enter emailId and password" })
         }
+        if (!email) return res.status(400).send({ status: false, message: "Please enter email" })
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) return res.status(400).send({ status: false, message: "enter valid email" })
         if (!isValid(email)) return res.status(400).send({ status: false, message: "Email Id is required" })
+        
+        if (!password) return res.status(400).send({ status: false, message: "Please enter password" })
         if (!isValid(password)) return res.status(400).send({ status: false, message: "password is required" })
+        if ((password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
+        if (!((password.length >= 8) && (password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
+
 
         const user = await userModel.findOne({ email: email });
         if (!user) return res.status(401).send({ status: false, message: "Invalid Credential" })
-        bcrypt.compare(password, user.password, function (err, result) {
-            if (err) return res.status(401).send({ status: false, message: "password is wrong" })
-        })
-
-        //  let actualPassWord = await bcrypt.compare(password, user.password);
-
-        //if(!actualPassWord) return res.status(400).send({ status: false, message: "Incorrect password" })
+        let matchUser = await bcrypt.compare(password, user.password)
+        if (!matchUser) return res.status(401).send({ status: false, message: "password does not match" })
 
         let token = jwt.sign({ userId: user._id.toString(), iat: Math.floor(Date.now() / 1000) },
             "Project5-productManagement",
@@ -189,7 +191,7 @@ const userLogin = async function (req, res) {
 
     }
     catch (err) {
-        res.status(500).send({ status: false, msg: err.message });
+        res.status(500).send({ status: false, message: err.message });
     }
 }
 
@@ -202,11 +204,11 @@ const getProfile = async function (req, res) {
         if (req.tokenId != userId) return res.status(403).send({ status: false, message: "unauthorized" })
 
         let profile = await userModel.findById(userId)
-        if (!profile) return res.status(404).send({ status: false, message: "no such user" })
+        if (!profile) return res.status(404).send({ status: false, message: "userId not exist" })
         res.status(200).send({ status: true, message: 'User profile details', data: profile })
 
     } catch (error) {
-        res.status(500).send({ status: false, msg: err.message })
+        res.status(500).send({ status: false, message: err.message })
     }
 }
 
@@ -229,9 +231,9 @@ const updatedProfile = async (req, res) => {
             return res.status(400).send({ status: false, message: "userId is Invalid" });
         }
 
-        //const findUserId = await userModel.findById(userId);
-        //if (!findUserId)
-        //return res.status(403).send({ status: false, message: "NO DATA FOUND" });
+        const findUserId = await userModel.findById(userId);
+        if (!findUserId)
+        return res.status(404).send({ status: false, message: "NO DATA FOUND" });
         if (userId != userIdfromtoken) {
             return res.status(403).send({ status: false, message: "YOU ARE NOT AUTHORIZED" });
         }
@@ -239,7 +241,7 @@ const updatedProfile = async (req, res) => {
 
         // check request body is valid
         if (!(isValidRequestBody(data) || files)) {
-            return res.status(400).send({ status: false, msg: "Enter a valid details" });
+            return res.status(400).send({ status: false, message: "Enter a valid details" });
         }
 
         let { fname, lname, email, password, phone, address } = data;
@@ -247,20 +249,20 @@ const updatedProfile = async (req, res) => {
 
         if (fname) {
             if (!isValid(fname)) { return res.status(400).send({ status: false, message: "fname is missing." }); }
-            // if (!validString(fname)) {return res.status(400).send({ status: false, msg: "fname should be string" });}
+            // if (!validString(fname)) {return res.status(400).send({ status: false, message: "fname should be string" });}
             updateData.fname = fname;
         }
 
         if (lname) {
             if (!isValid(lname)) { return res.status(400).send({ status: false, message: "lname is missing." }); }
-            //  if (!validString(lname)) {return res.status(400).send({ status: false, msg: "lname should be string" });}
+            //  if (!validString(lname)) {return res.status(400).send({ status: false, message: "lname should be string" });}
             updateData.lname = lname;
         }
         if (email) {
             email = email.toLowerCase()
             if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) return res.status(400).send({ status: false, message: "enter valid email" })
             let emailCheck = await userModel.findOne({ email: email })
-            if (emailCheck) return res.status(409).send({ status: false, msg: "email already used" })
+            if (emailCheck) return res.status(409).send({ status: false, message: "email already used" })
             // if (!isValid(email)) return res.status(400).send({ status: false, message: "email must be in string & not empty"})
             updateData.email = email;
         }
@@ -350,12 +352,12 @@ const updatedProfile = async (req, res) => {
 
 
         const updateUser = await userModel.findByIdAndUpdate(userId, updateData, { new: true })
-        res.status(200).send({ status: true, msg: "User profile updated", data: updateUser })
+        res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
 
 
     } catch (err) {
         console.log(err)
-        res.status(500).send({ msg: err.message })
+        res.status(500).send({ message: err.message })
     }
 };
 
